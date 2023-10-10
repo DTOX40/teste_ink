@@ -2,7 +2,7 @@ class OrdersController < ApplicationController
   before_action :set_order, only: %i[ show edit update destroy ]
 
   def index
-    @orders = Order.all
+    @orders = Order.page(params[:page]).per(10)
   end
 
   def show

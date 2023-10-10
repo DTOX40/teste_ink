@@ -1,8 +1,14 @@
 <h1>Top 10 Lojas com Maior Faturamento</h1>
+
 <ul>
   <% @top_stores.each do |store| %>
-    <li>
-      <%= store.name %> - Faturamento: <%= number_to_currency(store.total_revenue) %>
+    <li class="<%= cycle('bg-gray-100', 'bg-gray-200') %> p-4 rounded-lg shadow-md">
+      <div class="text-lg text-gray-900 dark:text-white">
+        Nome: <%= store.name %><br>
+        Faturamento: <%= number_to_currency(store.total_revenue) %>
+      </div>
     </li>
   <% end %>
 </ul>
+
+<%= link_to 'Voltar para a lista de lojas', stores_path, class: "mt-4 block text-blue-600 hover:text-blue-900" %>

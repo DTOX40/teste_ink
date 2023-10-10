@@ -2,7 +2,7 @@ class StoresController < ApplicationController
   before_action :set_store, only: %i[show edit update destroy]
 
   def index
-    @stores = Store.all
+    @stores = Store.page(params[:page]).per(10)
   end
 
   def show
