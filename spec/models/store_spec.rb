@@ -1,35 +1,33 @@
-# spec/models/store_spec.rb
-
 require 'rails_helper'
 
 RSpec.describe Store, type: :model do
   describe "validations" do
     it "is not valid without a name" do
-      store = Store.new(name: nil, description: "Description")
+      store = build(:store, name: nil)
       expect(store).not_to be_valid
       expect(store.errors[:name]).to include("can't be blank")
     end
 
     it "is not valid without a description" do
-      store = Store.new(name: "Store Name", description: nil)
+      store = build(:store, description: nil)
       expect(store).not_to be_valid
       expect(store.errors[:description]).to include("can't be blank")
     end
 
     it "is valid with a name and description" do
-      store = Store.new(name: "Store Name", description: "Description")
+      store = build(:store)
       expect(store).to be_valid
     end
   end
 
   describe "database" do
     it "can save a valid store" do
-      store = Store.new(name: "Valid Store", description: "Valid Description")
+      store = build(:store)
       expect(store.save).to be true
     end
 
     it "cannot save an invalid store" do
-      store = Store.new(name: nil, description: "Invalid Description")
+      store = build(:store, name: nil)
       expect(store.save).to be false
     end
   end

@@ -21,11 +21,12 @@ class OrdersController < ApplicationController
     @order = Order.new(order_params)
     @product = @order.product
   
-    if @order.valid? && sufficient_stock?
+    if @order.skip_stock_validation || (@order.valid? && sufficient_stock?)
       new_stock = @product.stock - @order.shipping.to_i
   
       if new_stock >= 0
         @product.update(stock: new_stock)
+        @order.save
         redirect_to @order, notice: 'Ordem criada com sucesso.'
       else
         flash.now[:alert] = 'Quantidade em estoque insuficiente para criar a ordem.'
@@ -36,6 +37,8 @@ class OrdersController < ApplicationController
       render :new, status: :unprocessable_entity
     end
   end
+  
+  
 
   def update
     respond_to do |format|

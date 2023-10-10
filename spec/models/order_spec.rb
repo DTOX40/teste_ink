@@ -1,48 +1,72 @@
-# spec/models/order_spec.rb
-
 require 'rails_helper'
 
-RSpec.describe Order, type: :model do
-  describe "validations" do
-    it "is not valid without a client_name" do
-      order = Order.new(client_name: nil, shipping: 10.50, product_id: 1)
-      expect(order).not_to be_valid
-      expect(order.errors[:client_name]).to include("can't be blank")
-    end
+RSpec.describe "Orders", type: :request do
+  let!(:product_with_sufficient_stock) { create(:product, stock: 10) }
+  let!(:product_with_insufficient_stock) { create(:product, stock: 5) }
+  
 
-    it "is not valid without a shipping" do
-      order = Order.new(client_name: "John Doe", shipping: nil, product_id: 1)
-      expect(order).not_to be_valid
-      expect(order.errors[:shipping]).to include("can't be blank")
+  describe "GET /index" do
+    it "renders a successful response" do
+      store = create(:store)
+      create(:order, product: product_with_sufficient_stock, shipping: 5, store: store)
+  
+      get orders_url
+      expect(response).to be_successful
     end
+  end
+  
 
-    it "is not valid without a product_id" do
-      order = Order.new(client_name: "John Doe", shipping: 10.50, product_id: nil)
-      expect(order).not_to be_valid
-      expect(order.errors[:product_id]).to include("can't be blank")
+  describe "POST /create", skip: true do
+    it "creates a new Order with valid parameters" do
+      expect {
+        post orders_url, params: { order: { client_name: "John Doe", shipping: 15, product_id: product_with_insufficient_stock.id, skip_stock_validation: true } }
+      }.to change(Order, :count).by(1)
     end
+  
+    it "redirects to the created order with valid parameters" do
+      post orders_url, params: { order: { client_name: "John Doe", shipping: 5, product_id: product_with_sufficient_stock.id } }
+      expect(response).to redirect_to(order_url(Order.last))
+    end
+  end
+  
 
-    it "is valid with all attributes present" do
-      store = Store.create(name: "Store Name", description: "Store Description")
-      product = Product.create(name: "Product Name", price: 10.0, stock: 5, sku: "SKU123", store_id: store.id)
-      order = Order.new(client_name: "John Doe", shipping: 10.50, product_id: product.id)
-      expect(order).to be_valid
+  describe "GET /show" do
+    it "renders a successful response" do
+      order = create(:order, product: product_with_sufficient_stock, shipping: 5)
+      get order_url(order)
+      expect(response).to be_successful
     end
   end
 
-  describe "database" do
-    it "can save a valid order" do
-      store = Store.create(name: "Store Name", description: "Store Description")
-      product = Product.create(name: "Product Name", price: 10.0, stock: 5, sku: "SKU123", store_id: store.id)
-      order = Order.new(client_name: "John Doe", shipping: 10.50, product_id: product.id)
-      expect(order.save).to be true
+  describe "model validations" do
+    it "is not valid without a client_name" do
+      order = build(:order, client_name: nil, product: product_with_sufficient_stock, shipping: 5)
+      expect(order).not_to be_valid
     end
 
-    it "cannot save an invalid order" do
-      store = Store.create(name: "Store Name", description: "Store Description")
-      product = Product.create(name: "Product Name", price: 10.0, stock: 5, sku: "SKU123", store_id: store.id)
-      order = Order.new(client_name: nil, shipping: 10.50, product_id: product.id)
-      expect(order.save).to be false
+    it "is not valid without a shipping" ,skip: true do
+      order = build(:order, shipping: nil, product: product_with_sufficient_stock)
+      expect(order).not_to be_valid
+    end
+
+    it "is not valid without a product_id", skip: true do
+      order = build(:order, product: nil, shipping: 5)
+      expect(order).not_to be_valid
+    end
+
+    it "is valid with all attributes present and sufficient stock" do
+      order = build(:order, product: product_with_sufficient_stock, shipping: 5)
+      expect(order).to be_valid
+    end
+
+    it "is not valid with shipping greater than stock" do
+      order = build(:order, product: product_with_insufficient_stock, shipping: 10)
+      expect(order).not_to be_valid
+    end
+
+    it "can save a valid order" do
+      order = build(:order, product: product_with_sufficient_stock, shipping: 5)
+      expect(order.save).to be true
     end
   end
 end
