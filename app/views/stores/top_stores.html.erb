@@ -1,0 +1,8 @@
+<h1>Top 10 Lojas com Maior Faturamento</h1>
+<ul>
+  <% @top_stores.each do |store| %>
+    <li>
+      <%= store.name %> - Faturamento: <%= number_to_currency(store.total_revenue) %>
+    </li>
+  <% end %>
+</ul>

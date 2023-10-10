@@ -12,4 +12,9 @@
     </div>
     <%= link_to 'Back to products', products_path, class: "ml-2 rounded-lg py-3 px-5 bg-gray-100 inline-block font-medium" %>
   </div>
+
+  <h1><%= @product.name %></h1>
+  <h1><%= @product.id %></h1>
+  <p>Estoque Disponível: <%= @product.stock %></p>
+
 </div>

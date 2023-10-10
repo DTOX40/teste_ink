@@ -1,0 +1,9 @@
+<h1>Produtos e Vendas da Loja <%= @store.name %></h1>
+
+<ul>
+  <% @products.each do |product| %>
+    <li>
+      <%= product.name %> - Vendas: <%= product.orders.count %>
+    </li>
+  <% end %>
+</ul>

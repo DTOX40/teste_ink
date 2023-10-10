@@ -1,19 +1,28 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>DesafioInk</title>
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <%= csrf_meta_tags %>
-    <%= csp_meta_tag %>
-    <%= stylesheet_link_tag "tailwind", "inter-font", "data-turbo-track": "reload" %>
+<head>
+  <title>DesafioInk</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <%= csrf_meta_tags %>
+  <%= csp_meta_tag %>
+  <%= stylesheet_link_tag "tailwind", "inter-font", "data-turbo-track": "reload" %>
+  <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+  <%= javascript_importmap_tags %>
+</head>
+<body>
+  <nav class="bg-blue-600 p-4 text-white">
+    <div class="container mx-auto flex justify-between items-center">
+      <h1 class="text-2xl font-semibold">DesafioInk</h1>
+      <ul class="flex space-x-4">
+        <li><%= link_to 'Início', root_path, class: "hover:underline" %></li>
+        <li><%= link_to 'Lojas', stores_path, class: "hover:underline" %></li>
+        <li><%= link_to 'Top 10 Lojas', top_stores_stores_path, class: "hover:underline" %></li>
+      </ul>
+    </div>
+  </nav>
 
-    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
-    <%= javascript_importmap_tags %>
-  </head>
-
-  <body>
-    <main class="container mx-auto mt-28 px-5 flex">
-      <%= yield %>
-    </main>
-  </body>
+  <main class="container mx-auto mt-12 px-5">
+    <%= yield %>
+  </main>
+</body>
 </html>

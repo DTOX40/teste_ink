@@ -1,0 +1,11 @@
+<h1>Pedidos da Loja <%= @store.name %></h1>
+
+<ul>
+  <% @orders.each do |order| %>
+    <li>
+      Cliente: <%= order.client_name %><br>
+      Produto: <%= order.product.name %><br>
+      Data do Pedido: <%= order.created_at %>
+    </li>
+  <% end %>
+</ul>
