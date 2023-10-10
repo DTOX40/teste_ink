@@ -1,40 +1,42 @@
 class OrdersController < ApplicationController
   before_action :set_order, only: %i[ show edit update destroy ]
 
-  # GET /orders or /orders.json
   def index
     @orders = Order.all
   end
 
-  # GET /orders/1 or /orders/1.json
   def show
+    @order = Order.find(params[:id])
+    @store = Store.find_by(id: @order.store_id)
   end
 
-  # GET /orders/new
   def new
     @order = Order.new
   end
 
-  # GET /orders/1/edit
   def edit
   end
 
-  # POST /orders or /orders.json
   def create
     @order = Order.new(order_params)
-
-    respond_to do |format|
-      if @order.save
-        format.html { redirect_to order_url(@order), notice: "Order was successfully created." }
-        format.json { render :show, status: :created, location: @order }
+    @product = @order.product
+  
+    if @order.valid? && sufficient_stock?
+      new_stock = @product.stock - @order.shipping.to_i
+  
+      if new_stock >= 0
+        @product.update(stock: new_stock)
+        redirect_to @order, notice: 'Ordem criada com sucesso.'
       else
-        format.html { render :new, status: :unprocessable_entity }
-        format.json { render json: @order.errors, status: :unprocessable_entity }
+        flash.now[:alert] = 'Quantidade em estoque insuficiente para criar a ordem.'
+        render :new, status: :unprocessable_entity
       end
+    else
+      flash.now[:alert] = 'Por favor, corrija os erros abaixo.'
+      render :new, status: :unprocessable_entity
     end
   end
 
-  # PATCH/PUT /orders/1 or /orders/1.json
   def update
     respond_to do |format|
       if @order.update(order_params)
@@ -47,7 +49,6 @@ class OrdersController < ApplicationController
     end
   end
 
-  # DELETE /orders/1 or /orders/1.json
   def destroy
     @order.destroy
 
@@ -58,13 +59,16 @@ class OrdersController < ApplicationController
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
+
     def set_order
       @order = Order.find(params[:id])
     end
 
-    # Only allow a list of trusted parameters through.
     def order_params
       params.require(:order).permit(:client_name, :shipping, :product_id)
+    end
+
+    def sufficient_stock?
+      @order.shipping.to_i <= @product.stock
     end
 end

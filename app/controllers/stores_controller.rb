@@ -1,25 +1,21 @@
 class StoresController < ApplicationController
-  before_action :set_store, only: %i[ show edit update destroy ]
+  before_action :set_store, only: %i[show edit update destroy]
 
-  # GET /stores or /stores.json
   def index
     @stores = Store.all
   end
 
-  # GET /stores/1 or /stores/1.json
   def show
+    @store = Store.find(params[:id])
   end
 
-  # GET /stores/new
   def new
     @store = Store.new
   end
 
-  # GET /stores/1/edit
   def edit
   end
 
-  # POST /stores or /stores.json
   def create
     @store = Store.new(store_params)
 
@@ -34,7 +30,6 @@ class StoresController < ApplicationController
     end
   end
 
-  # PATCH/PUT /stores/1 or /stores/1.json
   def update
     respond_to do |format|
       if @store.update(store_params)
@@ -47,7 +42,6 @@ class StoresController < ApplicationController
     end
   end
 
-  # DELETE /stores/1 or /stores/1.json
   def destroy
     @store.destroy
 
@@ -57,14 +51,48 @@ class StoresController < ApplicationController
     end
   end
 
-  private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_store
-      @store = Store.find(params[:id])
+  def products_sales
+    @store = Store.find(params[:id])
+    @products = @store.products.includes(:orders)
+    @product_sales = {}
+
+    @products.each do |product|
+      total_sales = product.orders.count
+      @product_sales[product] = total_sales
     end
 
-    # Only allow a list of trusted parameters through.
-    def store_params
-      params.require(:store).permit(:name, :description)
-    end
+    render "products_sales"
+  end
+
+  def orders
+    @store = Store.find(params[:id])
+    @orders = @store.orders.includes(:product)
+
+    render "orders"
+  end
+
+  def top_stores
+    @top_stores = Store
+      .select('stores.*, SUM(orders.shipping + products.price) AS total_revenue')
+      .joins(orders: :product)
+      .group('stores.id')
+      .order('total_revenue DESC')
+      .limit(10)
+  
+    render 'top_stores'
+  end
+
+  def top
+    @top_stores = Store.top_10
+  end
+
+  private
+
+  def set_store
+    @store = Store.find(params[:id])
+  end
+
+  def store_params
+    params.require(:store).permit(:name, :description)
+  end
 end
